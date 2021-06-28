@@ -73,7 +73,6 @@ For example, the command
 will create an image named *mydbimage* that contains data from *path/to/mydbdata*. Database creation will time out after 10 minutes (600 seconds), and the script will check every 20 seconds for whether the database creation is complete. 
 
 
-
 ### Launch the database (MySQL example)
 
 You can now create a container which runs a mysql-server that includes your data. For example, we create the container and map the db to local port 3000, use
@@ -81,6 +80,24 @@ You can now create a container which runs a mysql-server that includes your data
 ``` 
 docker run -p 3000:3306 -e MYSQL_ROOT_PASSWORD=password mydbimage
 ```
+
+### Launch the database for use with docker R clients (DCAST/CPP example)
+
+You will need to connect to mysql using native authentication. In order to do this, turn ssl off and then allow *mysql_native_password* by running the commands below.
+
+Launch the container with ssl turned off:
+
+```
+docker run -it -d --name dcast gdancik/dcast:try_data bash -c "docker-entrypoint.sh --datadir /var/lib/mysql-no-volume/ --ssl=off"
+```
+
+Allow native authentication:
+
+```
+docker exec -it dcast bash -c 'mysql -u root --password=password -e "ALTER USER \"root\" IDENTIFIED WITH mysql_native_password BY \"password\""'
+```
+
+This behavior is also documented here: https://github.com/gdancik/lamp-rm/blob/main/troubleshooting/mysql.md
 
 For more information, see [https://hub.docker.com/_/mysql](https://hub.docker.com/_/mysql). Note that if you want to create a volume for the data directory, you now will need to map it to /var/lib/mysql-no-volume. Note that a volume will also be created for the original data directory /var/lib/mysql. To remove anonymous volumes automatically, use the --rm flag.
 
